@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
-from users.factory import AppUserFactory
 
 
 class LoginTest(APITestCase):
@@ -11,7 +10,7 @@ class LoginTest(APITestCase):
     url = "/api/login/"
 
     def setUp(self) -> None:
-        self.user = AppUserFactory()
+        self.user = get_user_model().objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
 
         # パスワードをpasswordに
         users = get_user_model().objects.all()
@@ -20,11 +19,11 @@ class LoginTest(APITestCase):
             user.save()
 
     def test_post(self):
-        payload = {"username": self.user.auth_user.username, "password": "wrongpassword"}
+        payload = {"username": self.user.username, "password": "wrongpassword"}
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, 400)
 
-        payload = {"username": self.user.auth_user.username, "password": "password"}
+        payload = {"username": self.user.username, "password": "password"}
 
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, 200)
